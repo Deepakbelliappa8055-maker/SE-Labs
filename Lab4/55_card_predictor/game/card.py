@@ -18,7 +18,8 @@ class Card:
         pygame.draw.rect(surface, (50, 50, 50), card_rect, width=3, border_radius=10)
 
         font_rank = pygame.font.SysFont(None, 36)
-        font_symbol = pygame.font.SysFont(None, 64)
+        # The default font has no suit glyphs, so use a symbol-capable font when available.
+        font_symbol = pygame.font.SysFont("segoeuisymbol,dejavusans,arialunicodems", 56)
 
         rank_surf = font_rank.render(self.rank_str, True, self.color)
         surface.blit(rank_surf, (x + 10, y + 8))
