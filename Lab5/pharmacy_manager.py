@@ -32,6 +32,7 @@ _OPERATORS = {
 
 medicines = {}
 
+
 def add_medicine(name, qty=0, price=0.0, expiry="2099-12-31", audit=None):
     """Add qty units of a medicine and return the audit log.
 
@@ -55,6 +56,7 @@ def add_medicine(name, qty=0, price=0.0, expiry="2099-12-31", audit=None):
     audit.append(f"{datetime.now()}: Stocked {qty} units of {name}")
     return audit
 
+
 def dispense_medicine(name, qty):
     """Dispense qty units; raise KeyError or ValueError if not possible."""
     if name not in medicines:
@@ -69,16 +71,20 @@ def dispense_medicine(name, qty):
     if medicines[name]["qty"] == 0:
         del medicines[name]
 
+
 def get_quantity(name):
     """Return the units in stock (0 if the medicine is not stocked)."""
     return medicines.get(name, {}).get("qty", 0)
 
+
 def _expiry_date(name):
     return datetime.strptime(medicines[name]["expiry"], DATE_FORMAT).date()
+
 
 def is_expired(name):
     """Return True if the medicine's expiry date has passed."""
     return _expiry_date(name) < date.today()
+
 
 def bill_amount(prescription):
     """Return the total for a list of (medicine, qty) pairs.
@@ -94,6 +100,7 @@ def bill_amount(prescription):
         total += medicines[name]["price"] * qty
     return round(total, 2)
 
+
 def _evaluate(node):
     """Evaluate a parsed arithmetic expression made only of numbers."""
     if isinstance(node, ast.Expression):
@@ -105,22 +112,27 @@ def _evaluate(node):
         return _OPERATORS[type(node.op)](left, right)
     raise ValueError("Dosage formula may only use numbers and + - * /")
 
+
 def calculate_dosage(formula):
     """Work out a dosage from a doctor's note such as '250 * 2'."""
     return _evaluate(ast.parse(formula, mode="eval"))
+
 
 def patient_id(name, phone):
     """Return a stable patient identifier."""
     return hashlib.sha256((name + phone).encode()).hexdigest()
 
+
 def generate_rx_number():
     """Return an unpredictable prescription number."""
     return f"RX-{100000 + secrets.randbelow(900000)}"
+
 
 def save_stock(path=STOCK_FILE):
     """Save the stock to a JSON file."""
     with open(path, "w", encoding="utf-8") as handle:
         json.dump(medicines, handle, indent=2)
+
 
 def load_stock(path=STOCK_FILE):
     """Replace the in-memory stock with the contents of a JSON file."""
@@ -129,9 +141,11 @@ def load_stock(path=STOCK_FILE):
     medicines.clear()
     medicines.update(data)
 
+
 def print_label(name):
     """Print a dispensing label."""
     print(f"Dispensing label: {name}")
+
 
 def expiring_soon(days=30):
     """Return medicines that expire within the next `days` days."""
@@ -141,12 +155,14 @@ def expiring_soon(days=30):
         if 0 <= (_expiry_date(name) - today).days < days
     ]
 
+
 def pharmacist_login(password):
     """Check a pharmacist password against the stored digest."""
     digest = hashlib.pbkdf2_hmac(
         "sha256", password.encode(), LOGIN_SALT, LOGIN_ITERATIONS
     ).hex()
     return hmac.compare_digest(digest, LOGIN_DIGEST)
+
 
 def print_stock():
     """Print every medicine in stock."""
@@ -157,6 +173,7 @@ def print_stock():
             f"exp {item['expiry']}"
         )
 
+
 def _try(action, *args):
     """Run a demo step and print the error instead of crashing."""
     try:
@@ -164,6 +181,7 @@ def _try(action, *args):
     except (KeyError, ValueError) as error:
         print(f"Rejected {action.__name__}{args}: {error}")
         return None
+
 
 def main():
     """Run the built-in demo."""
@@ -187,5 +205,7 @@ def main():
     save_stock()
     load_stock()
     print_stock()
+
+
 if __name__ == "__main__":
     main()
